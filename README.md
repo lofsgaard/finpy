@@ -4,7 +4,7 @@ FinPy is a FastAPI-based application for importing, storing, updating, and servi
 
 ## Features
 
-- Imports transaction data from CSV files in the `db/data/` directory or via the `/transactions` upload endpoint.
+- Imports transaction data via the `/transactions` upload endpoint.
 - Maps and cleans up CSV columns to match the `Transactions` database model.
 - Stores transactions in a SQLite database (`db/database.db`).
 - Provides a REST API endpoint to fetch all transactions or a single transaction by ID.
@@ -78,7 +78,3 @@ README.md              # This file
 - SQLModel
 - pandas
 - [uv](https://github.com/astral-sh/uv)
-
-## License
-
-MIT License
