@@ -4,18 +4,36 @@ from db.models import Transactions, TransactionUpdateHoved, TransactionUpdateUnd
 from sqlmodel import Session, select
 import pandas as pd
 import io
+from collections import OrderedDict
 
 
 app = FastAPI()
 
-@app.get("/transactions")
-async def get_transactions(session: Session = Depends(get_session)) -> list[Transactions]:
+@app.get("/transactions", response_model=list[Transactions])
+async def get_transactions(session: Session = Depends(get_session)):
     with session:
         result = session.exec(select(Transactions)).all()
-        return result
+        ordered = [
+            OrderedDict([
+                ("id", t.id),
+                ("dato", t.dato),
+                ("inn", t.inn),
+                ("ut", t.ut),
+                ("tilkonto", t.tilkonto),
+                ("tilkonto_nr", t.tilkonto_nr),
+                ("frakonto", t.frakonto),
+                ("frakonto_nr", t.frakonto_nr),
+                ("type", t.type),
+                ("tekst", t.tekst),
+                ("kid", t.kid),
+                ("hovedkategori", t.hovedkategori),
+                ("underkategori", t.underkategori),
+            ]) for t in result
+        ]
+        return ordered
     
 @app.get("/transactions/{transaction_id}", response_model=Transactions)
-async def get_transaction(transaction_id: int, session: Session = Depends(get_session)) -> Transactions:
+async def get_transaction(transaction_id: int, session: Session = Depends(get_session)):
     with session:
         transaction = session.get(Transactions, transaction_id)
         if transaction is None:
@@ -24,7 +42,7 @@ async def get_transaction(transaction_id: int, session: Session = Depends(get_se
     
 
 @app.post("/transactions/hoved/{transaction_id}")
-async def update_transaction(transaction_id: int, transaction: TransactionUpdateHoved, session: Session = Depends(get_session)) -> Transactions:
+async def update_transaction(transaction_id: int, transaction: TransactionUpdateHoved, session: Session = Depends(get_session)):
     with session:
         existing_transaction = session.get(Transactions, transaction_id)
         if existing_transaction is None:
@@ -39,7 +57,7 @@ async def update_transaction(transaction_id: int, transaction: TransactionUpdate
         return session.get(Transactions, transaction_id)
     
 @app.post("/transactions/under/{transaction_id}")
-async def update_transaction(transaction_id: int, transaction: TransactionUpdateUnder, session: Session = Depends(get_session)) -> Transactions:
+async def update_transaction(transaction_id: int, transaction: TransactionUpdateUnder, session: Session = Depends(get_session)):
     with session:
         existing_transaction = session.get(Transactions, transaction_id)
         if existing_transaction is None:
