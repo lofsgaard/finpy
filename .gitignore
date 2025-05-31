@@ -10,6 +10,5 @@ wheels/
 .venv
 
 # Custom
-db/data/*
 db/database.db
-dataframe.py
+.DS_Store

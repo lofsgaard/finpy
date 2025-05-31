@@ -1,5 +1,4 @@
 from sqlmodel import Field, SQLModel
-from decimal import Decimal
 from datetime import date
 
 class Transactions(SQLModel, table=True):
@@ -15,4 +14,11 @@ class Transactions(SQLModel, table=True):
     tekst: str | None = None
     kid: str | None = None
     hovedkategori: str | None = None
+    underkategori: str | None = None
+
+
+class TransactionUpdateHoved(SQLModel):
+    hovedkategori: str | None = None
+
+class TransactionUpdateUnder(SQLModel):
     underkategori: str | None = None
