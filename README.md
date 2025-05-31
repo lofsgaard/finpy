@@ -1,13 +1,15 @@
 # FinPy
 
-FinPy is a FastAPI-based application for importing, storing, and serving bank transaction data from CSV files. It uses SQLModel for ORM/database access and pandas for data import and transformation.
+FinPy is a FastAPI-based application for importing, storing, updating, and serving bank transaction data from CSV files. It uses SQLModel for ORM/database access and pandas for data import and transformation.
 
 ## Features
 
-- Imports transaction data from CSV files in the `db/data/` directory.
+- Imports transaction data from CSV files in the `db/data/` directory or via the `/transactions` upload endpoint.
 - Maps and cleans up CSV columns to match the `Transactions` database model.
 - Stores transactions in a SQLite database (`db/database.db`).
-- Provides a REST API endpoint to fetch all transactions.
+- Provides a REST API endpoint to fetch all transactions or a single transaction by ID.
+- Supports updating transaction categories (hovedkategori/underkategori) via dedicated endpoints.
+- Allows deleting transactions by ID.
 
 ## Project Structure
 
@@ -24,8 +26,7 @@ README.md              # This file
 
 1. **Data Import:**
 
-   - Place your CSV files (with columns like "Dato", "Inn på konto", etc.) in `db/data/`.
-   - When you run the app, it reads these files, remaps columns, converts data types, and imports them into the SQLite database.
+   - Upload a CSV file via the `/transactions` POST endpoint to import transactions. The app reads the uploaded file, remaps columns, converts data types, and imports them into the SQLite database.
 
 2. **Database:**
 
@@ -33,7 +34,12 @@ README.md              # This file
    - The database file is located at `db/database.db`.
 
 3. **API:**
-   - The FastAPI app exposes a `/transactions` endpoint that returns all transactions as JSON.
+   - `GET /transactions` — Returns all transactions as JSON.
+   - `GET /transactions/{transaction_id}` — Returns a single transaction by ID.
+   - `POST /transactions` — Upload a CSV file to import transactions.
+   - `POST /transactions/hoved/{transaction_id}` — Update the hovedkategori (main category) of a transaction.
+   - `POST /transactions/under/{transaction_id}` — Update the underkategori (subcategory) of a transaction.
+   - `DELETE /transactions/{transaction_id}` — Delete a transaction by ID.
 
 ## Setup & Usage
 
@@ -52,20 +58,17 @@ README.md              # This file
    This will:
 
    - Create the database and tables (if not present)
-   - Import data from CSV files in `db/data/`
 
 3. **Start the API server:**
 
    ```zsh
    uv run fastapi dev
-
    ```
 
    The API will be available at [http://127.0.0.1:8000/transactions](http://127.0.0.1:8000/transactions).
 
 ## Customization
 
-- To add more CSV files, simply place them in `db/data/` and rerun the import.
 - Adjust the column mapping in `db/db.py` if your CSV format changes.
 
 ## Requirements
