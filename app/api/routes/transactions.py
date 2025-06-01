@@ -102,6 +102,6 @@ async def upload_transactions(file: UploadFile = File(...)):
             sqlite_connection.close()
             return {"message": "Transactions uploaded successfully"}
         except Exception as e:
-            return {"error": f"An error occurred while processing the file: {str(e)}"}
+            return {"error": f"An error occurred while processing the file"}
     else:
         return {"error": "File must be a CSV file."}
