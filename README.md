@@ -5,7 +5,7 @@ FinPy is a modern financial transaction management system built with FastAPI, SQ
 ## Features
 
 - Import transaction data via a `/transactions` upload endpoint (CSV file upload)
-- Store transactions in a PostgreSQL or SQLite database using SQLModel
+- Store transactions in a PostgreSQL database using SQLModel
 - REST API endpoints to fetch all transactions, fetch by year, fetch by ID, update categories, and delete
 - Streamlit dashboard for interactive data analysis and visualization
 - Customizable column mapping and category management
@@ -74,7 +74,7 @@ uv.lock                    # uv dependency lock file
 3. **Run the FastAPI application:**
 
    ```sh
-   uvicorn app.main:app --reload
+   uv run fastapi dev
    ```
 
    The API docs will be available at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
@@ -94,7 +94,3 @@ uv.lock                    # uv dependency lock file
 - uv (for dependency management)
 - psycopg (for PostgreSQL)
 - streamlit
-
-## License
-
-MIT License
