@@ -12,3 +12,4 @@ wheels/
 # Custom
 db/database.db
 .DS_Store
+.env

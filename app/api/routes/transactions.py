@@ -1,15 +1,15 @@
-from fastapi import FastAPI, Depends, UploadFile, File, HTTPException
-from db.db import create_db_and_tables, get_session, engine
-from db.models import Transactions, TransactionUpdateHoved, TransactionUpdateUnder
+from app.core.db.db import  get_session, engine
+from app.core.db.models import Transactions, TransactionUpdateHoved, TransactionUpdateUnder
 from sqlmodel import Session, select
+from fastapi import Depends, UploadFile, File, HTTPException, APIRouter, HTTPException
 import pandas as pd
 import io
 from collections import OrderedDict
 
+router = APIRouter()
 
-app = FastAPI()
 
-@app.get("/transactions", response_model=list[Transactions])
+@router.get("/transactions", response_model=list[Transactions])
 async def get_transactions(session: Session = Depends(get_session)):
     with session:
         result = session.exec(select(Transactions)).all()
@@ -32,7 +32,7 @@ async def get_transactions(session: Session = Depends(get_session)):
         ]
         return ordered
     
-@app.get("/transactions/{transaction_id}", response_model=Transactions)
+@router.get("/transactions/{transaction_id}", response_model=Transactions)
 async def get_transaction(transaction_id: int, session: Session = Depends(get_session)):
     with session:
         transaction = session.get(Transactions, transaction_id)
@@ -41,7 +41,7 @@ async def get_transaction(transaction_id: int, session: Session = Depends(get_se
         return transaction
     
 
-@app.post("/transactions/hoved/{transaction_id}")
+@router.post("/transactions/hoved/{transaction_id}")
 async def update_transaction(transaction_id: int, transaction: TransactionUpdateHoved, session: Session = Depends(get_session)):
     with session:
         existing_transaction = session.get(Transactions, transaction_id)
@@ -56,7 +56,7 @@ async def update_transaction(transaction_id: int, transaction: TransactionUpdate
         session.refresh(existing_transaction)
         return session.get(Transactions, transaction_id)
     
-@app.post("/transactions/under/{transaction_id}")
+@router.post("/transactions/under/{transaction_id}")
 async def update_transaction(transaction_id: int, transaction: TransactionUpdateUnder, session: Session = Depends(get_session)):
     with session:
         existing_transaction = session.get(Transactions, transaction_id)
@@ -71,7 +71,7 @@ async def update_transaction(transaction_id: int, transaction: TransactionUpdate
         session.refresh(existing_transaction)
         return session.get(Transactions, transaction_id)
     
-@app.delete("/transactions/{transaction_id}")
+@router.delete("/transactions/{transaction_id}")
 async def delete_transaction(transaction_id: int, session: Session = Depends(get_session)):
     with session:
         transaction = session.get(Transactions, transaction_id)
@@ -81,7 +81,7 @@ async def delete_transaction(transaction_id: int, session: Session = Depends(get
         session.commit()
         return {"message": "Transaction deleted successfully"}
     
-@app.post("/transactions")
+@router.post("/transactions")
 async def upload_transactions(file: UploadFile = File(...)):
     if file.content_type == "text/csv":
         try:
@@ -116,7 +116,3 @@ async def upload_transactions(file: UploadFile = File(...)):
             return {"error": f"An error occurred while processing the file: {str(e)}"}
     else:
         return {"error": "File must be a CSV file."}
-
-
-if __name__ == "__main__":
-    create_db_and_tables()
