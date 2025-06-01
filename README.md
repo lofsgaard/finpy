@@ -1,15 +1,14 @@
 # FinPy
 
-FinPy is a FastAPI-based application for importing, storing, updating, and serving bank transaction data from CSV files. It uses SQLModel for ORM/database access and pandas for data import and transformation.
+FinPy is a modern financial transaction management system built with FastAPI, SQLModel, and Streamlit. It allows you to import, store, update, and analyze bank transaction data from CSV files, and provides both a REST API and a Streamlit dashboard for data exploration.
 
 ## Features
 
-- Import transaction data via the `/transactions` upload endpoint (CSV file upload).
-- Maps and cleans up CSV columns to match the `Transactions` database model.
-- Stores transactions in a SQLite database.
-- Provides REST API endpoints to fetch all transactions or a single transaction by ID.
-- Supports updating transaction categories (hovedkategori/underkategori) via dedicated endpoints.
-- Allows deleting transactions by ID.
+- Import transaction data via a `/transactions` upload endpoint (CSV file upload)
+- Store transactions in a PostgreSQL or SQLite database using SQLModel
+- REST API endpoints to fetch all transactions, fetch by year, fetch by ID, update categories, and delete
+- Streamlit dashboard for interactive data analysis and visualization
+- Customizable column mapping and category management
 
 ## Project Structure
 
@@ -19,68 +18,71 @@ app/
     main.py                # API router entry point
     routes/
       transactions.py      # All transaction-related endpoints
-  db/
-    db.py                  # Database setup, session management, import logic
-    models.py              # SQLModel data models
   core/
-    config.py              # App configuration (if present)
+    config.py              # App configuration
+    db/
+      db.py                # Database setup, session management, import logic
+      models.py            # SQLModel data models
+frontend/
+  main.py                  # Streamlit dashboard
 README.md                  # This file
-```
-
-### Example: API Router Setup
-
-```python
-# filepath: /Users/andreas/Code/finpy/app/api/main.py
-from fastapi import APIRouter
-from app.api.routes import transactions
-
-api_router = APIRouter()
-api_router.include_router(transactions.router)
+alembic/                   # Database migrations
+pyproject.toml             # Project dependencies and settings
+uv.lock                    # uv dependency lock file
 ```
 
 ## How It Works
 
-1. **Data Import:**
+### Data Import
 
-   - Upload a CSV file via the `/transactions` POST endpoint to import transactions. The app reads the uploaded file, remaps columns, converts data types, and imports them into the SQLite database.
+- Upload a CSV file via the `/transactions` POST endpoint to import transactions. The app reads the uploaded file, remaps columns, converts data types, and imports them into the database.
 
-2. **Database:**
+### Database
 
-   - The database schema is defined in `app/db/models.py` using SQLModel.
+- The database schema is defined in `app/core/db/models.py` using SQLModel.
+- Database migrations are managed with Alembic (`alembic/`).
 
-3. **API Endpoints:**
-   - `GET /transactions` — Returns all transactions as JSON.
-   - `GET /transactions/{transaction_id}` — Returns a single transaction by ID.
-   - `POST /transactions` — Upload a CSV file to import transactions.
-   - `POST /transactions/hoved/{transaction_id}` — Update the hovedkategori (main category) of a transaction.
-   - `POST /transactions/under/{transaction_id}` — Update the underkategori (subcategory) of a transaction.
-   - `DELETE /transactions/{transaction_id}` — Delete a transaction by ID.
+### API Endpoints
+
+- `GET /transactions` — Returns all transactions as JSON
+- `GET /transactions/{transaction_id}` — Returns a single transaction by ID
+- `GET /transactions/year/{year}` — Returns all transactions for a given year
+- `POST /transactions` — Upload a CSV file to import transactions
+- `PUT /transactions/hovedkategori/{transaction_id}` — Update the hovedkategori (main category) of a transaction
+- `PUT /transactions/underkategori/{transaction_id}` — Update the underkategori (subcategory) of a transaction
+- `DELETE /transactions/{transaction_id}` — Delete a transaction by ID
+
+### Streamlit Dashboard
+
+- The dashboard in `frontend/main.py` lets you search, filter, and summarize transactions by year, store, and category.
+- Summaries and totals are shown for selected stores and categories.
 
 ## Setup & Usage
 
 1. **Install dependencies:**
 
-   ```zsh
+   ```sh
    uv sync
    ```
 
-2. **Run the application to create database and import:**
+2. **Run database migrations (if using PostgreSQL):**
 
-   ```zsh
-   uv run app/main.py
+   ```sh
+   alembic upgrade head
    ```
 
-   This will:
+3. **Run the FastAPI application:**
 
-   - Create the database and tables (if not present)
-
-3. **Start the API server:**
-
-   ```zsh
-   uv run fastapi dev
+   ```sh
+   uvicorn app.main:app --reload
    ```
 
    The API docs will be available at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
+
+4. **Run the Streamlit dashboard:**
+   ```sh
+   streamlit run frontend/main.py
+   ```
 
 ## Requirements
 
@@ -90,7 +92,8 @@ api_router.include_router(transactions.router)
 - pandas
 - uvicorn
 - uv (for dependency management)
-- psycopg
+- psycopg (for PostgreSQL)
+- streamlit
 
 ## License
 
