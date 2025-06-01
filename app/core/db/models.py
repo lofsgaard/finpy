@@ -1,24 +1,26 @@
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, SQLModel, Column
+from sqlalchemy import BigInteger
 from datetime import date
+from decimal import Decimal
 
 class Transactions(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
     dato: date
-    inn: float | None = None
-    ut: float | None = None
-    tilkonto: str | None = None
-    tilkonto_nr: int | None = None
-    frakonto: str | None = None
-    frakonto_nr: int | None = None
-    type: str
-    tekst: str | None = None
-    kid: str | None = None
-    hovedkategori: str | None = None
-    underkategori: str | None = None
+    inn: Decimal | None  = Field(default=None, max_digits=10, decimal_places=2)
+    ut: Decimal | None = Field(default=None, max_digits=10, decimal_places=2)
+    tilkonto: str | None = Field(default=None, max_length=255)
+    tilkonto_nr: int | None = Field(default=None, max_length=255, sa_column=Column(BigInteger()))
+    frakonto: str | None = Field(default=None, max_length=255)
+    frakonto_nr: int | None = Field(default=None, max_length=255, sa_column=Column(BigInteger()))
+    type: str = Field(max_length=255)
+    tekst: str | None = Field(default=None, max_length=255)
+    kid: str | None = Field(default=None, max_length=255)
+    hovedkategori: str | None = Field(default=None, max_length=255)
+    underkategori: str | None = Field(default=None, max_length=255)
 
 
 class TransactionUpdateHoved(SQLModel):
-    hovedkategori: str | None = None
+    hovedkategori: str
 
 class TransactionUpdateUnder(SQLModel):
-    underkategori: str | None = None
+    underkategori: str

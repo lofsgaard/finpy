@@ -6,13 +6,14 @@ import pandas as pd
 import io
 from collections import OrderedDict
 
-router = APIRouter()
+router = APIRouter(prefix="/transactions", tags=["transcations"])
 
 
-@router.get("/transactions", response_model=list[Transactions])
+@router.get("/", response_model=list[Transactions])
 async def get_transactions(session: Session = Depends(get_session)):
     with session:
         result = session.exec(select(Transactions)).all()
+        print(result)
         ordered = [
             OrderedDict([
                 ("id", t.id),
@@ -30,9 +31,11 @@ async def get_transactions(session: Session = Depends(get_session)):
                 ("underkategori", t.underkategori),
             ]) for t in result
         ]
+        if not result:
+            raise HTTPException(status_code=404, detail="No data found")
         return ordered
     
-@router.get("/transactions/{transaction_id}", response_model=Transactions)
+@router.get("/{transaction_id}", response_model=Transactions)
 async def get_transaction(transaction_id: int, session: Session = Depends(get_session)):
     with session:
         transaction = session.get(Transactions, transaction_id)
@@ -41,7 +44,8 @@ async def get_transaction(transaction_id: int, session: Session = Depends(get_se
         return transaction
     
 
-@router.post("/transactions/hoved/{transaction_id}")
+
+@router.put("/hoved/{transaction_id}")
 async def update_transaction(transaction_id: int, transaction: TransactionUpdateHoved, session: Session = Depends(get_session)):
     with session:
         existing_transaction = session.get(Transactions, transaction_id)
@@ -56,7 +60,7 @@ async def update_transaction(transaction_id: int, transaction: TransactionUpdate
         session.refresh(existing_transaction)
         return session.get(Transactions, transaction_id)
     
-@router.post("/transactions/under/{transaction_id}")
+@router.put("/under/{transaction_id}")
 async def update_transaction(transaction_id: int, transaction: TransactionUpdateUnder, session: Session = Depends(get_session)):
     with session:
         existing_transaction = session.get(Transactions, transaction_id)
@@ -71,7 +75,7 @@ async def update_transaction(transaction_id: int, transaction: TransactionUpdate
         session.refresh(existing_transaction)
         return session.get(Transactions, transaction_id)
     
-@router.delete("/transactions/{transaction_id}")
+@router.delete("/{transaction_id}")
 async def delete_transaction(transaction_id: int, session: Session = Depends(get_session)):
     with session:
         transaction = session.get(Transactions, transaction_id)
@@ -81,7 +85,7 @@ async def delete_transaction(transaction_id: int, session: Session = Depends(get
         session.commit()
         return {"message": "Transaction deleted successfully"}
     
-@router.post("/transactions")
+@router.post("/")
 async def upload_transactions(file: UploadFile = File(...)):
     if file.content_type == "text/csv":
         try:
@@ -102,12 +106,7 @@ async def upload_transactions(file: UploadFile = File(...)):
             contents = await file.read()
             df = pd.read_csv(io.StringIO(contents.decode("utf-8")), sep=";", decimal=",", encoding="utf-8")
             df = df.rename(columns=column_map)
-            pd.to_numeric(df["kid"], errors="coerce")
             df['dato'] = pd.to_datetime(df['dato']).dt.date
-            df = df.astype({
-                "inn": "float64",
-                "ut": "float64",
-                })
             sqlite_connection = engine.connect()
             df.to_sql("transactions", sqlite_connection, if_exists="append", index=False)
             sqlite_connection.close()

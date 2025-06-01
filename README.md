@@ -62,7 +62,7 @@ api_router.include_router(transactions.router)
 1. **Install dependencies:**
 
    ```zsh
-   uv pip install -r uv.lock
+   uv sync
    ```
 
 2. **Run the application to create database and import:**
