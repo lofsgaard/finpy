@@ -1,10 +1,10 @@
 from app.core.db.db import  get_session, engine
-from app.core.db.models import Transactions, TransactionUpdateHoved, TransactionUpdateUnder
+from app.core.db.models import Transactions
 from sqlmodel import Session, select
 from fastapi import Depends, UploadFile, File, HTTPException, APIRouter, HTTPException
 import pandas as pd
 import io
-from app.models import TransactionsReturnModel
+from app.models import TransactionsReturnModel, TransactionUpdateHovedReturnModel, TransactionUpdateUnderReturnModel
 
 router = APIRouter(prefix="/transactions", tags=["transcations"])
 
@@ -28,7 +28,7 @@ async def get_transaction(transaction_id: int, session: Session = Depends(get_se
 
 
 @router.put("/hoved/{transaction_id}")
-async def update_transaction(transaction_id: int, transaction: TransactionUpdateHoved, session: Session = Depends(get_session)):
+async def update_transaction(transaction_id: int, transaction: TransactionUpdateHovedReturnModel, session: Session = Depends(get_session)):
     with session:
         existing_transaction = session.get(Transactions, transaction_id)
         if existing_transaction is None:
@@ -43,7 +43,7 @@ async def update_transaction(transaction_id: int, transaction: TransactionUpdate
         return session.get(Transactions, transaction_id)
     
 @router.put("/under/{transaction_id}")
-async def update_transaction(transaction_id: int, transaction: TransactionUpdateUnder, session: Session = Depends(get_session)):
+async def update_transaction(transaction_id: int, transaction: TransactionUpdateUnderReturnModel, session: Session = Depends(get_session)):
     with session:
         existing_transaction = session.get(Transactions, transaction_id)
         if existing_transaction is None:

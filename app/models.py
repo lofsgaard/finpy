@@ -16,3 +16,9 @@ class TransactionsReturnModel(SQLModel):
     kid: str | None 
     hovedkategori: str | None 
     underkategori: str | None 
+
+class TransactionUpdateHovedReturnModel(SQLModel):
+    hovedkategori: str
+
+class TransactionUpdateUnderReturnModel(SQLModel):
+    underkategori: str

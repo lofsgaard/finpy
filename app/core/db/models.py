@@ -5,7 +5,7 @@ from decimal import Decimal
 
 class Transactions(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
-    dato: date
+    dato: date = Field(index=True)
     inn: Decimal | None  = Field(default=None, max_digits=10, decimal_places=2)
     ut: Decimal | None = Field(default=None, max_digits=10, decimal_places=2)
     tilkonto: str | None = Field(default=None, max_length=255)
@@ -17,10 +17,3 @@ class Transactions(SQLModel, table=True):
     kid: str | None = Field(default=None, max_length=255)
     hovedkategori: str | None = Field(default=None, max_length=255)
     underkategori: str | None = Field(default=None, max_length=255)
-
-
-class TransactionUpdateHoved(SQLModel):
-    hovedkategori: str
-
-class TransactionUpdateUnder(SQLModel):
-    underkategori: str
