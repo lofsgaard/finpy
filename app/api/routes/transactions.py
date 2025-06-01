@@ -4,38 +4,20 @@ from sqlmodel import Session, select
 from fastapi import Depends, UploadFile, File, HTTPException, APIRouter, HTTPException
 import pandas as pd
 import io
-from collections import OrderedDict
+from app.models import TransactionsReturnModel
 
 router = APIRouter(prefix="/transactions", tags=["transcations"])
 
 
-@router.get("/", response_model=list[Transactions])
+@router.get("/", response_model=list[TransactionsReturnModel])
 async def get_transactions(session: Session = Depends(get_session)):
     with session:
         result = session.exec(select(Transactions)).all()
-        print(result)
-        ordered = [
-            OrderedDict([
-                ("id", t.id),
-                ("dato", t.dato),
-                ("inn", t.inn),
-                ("ut", t.ut),
-                ("tilkonto", t.tilkonto),
-                ("tilkonto_nr", t.tilkonto_nr),
-                ("frakonto", t.frakonto),
-                ("frakonto_nr", t.frakonto_nr),
-                ("type", t.type),
-                ("tekst", t.tekst),
-                ("kid", t.kid),
-                ("hovedkategori", t.hovedkategori),
-                ("underkategori", t.underkategori),
-            ]) for t in result
-        ]
         if not result:
             raise HTTPException(status_code=404, detail="No data found")
-        return ordered
+        return result
     
-@router.get("/{transaction_id}", response_model=Transactions)
+@router.get("/{transaction_id}", response_model=TransactionsReturnModel)
 async def get_transaction(transaction_id: int, session: Session = Depends(get_session)):
     with session:
         transaction = session.get(Transactions, transaction_id)

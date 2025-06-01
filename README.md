@@ -47,7 +47,6 @@ api_router.include_router(transactions.router)
 2. **Database:**
 
    - The database schema is defined in `app/db/models.py` using SQLModel.
-   - The database file is typically located at `app/db/database.db` (or as configured).
 
 3. **API Endpoints:**
    - `GET /transactions` — Returns all transactions as JSON.
@@ -91,6 +90,7 @@ api_router.include_router(transactions.router)
 - pandas
 - uvicorn
 - uv (for dependency management)
+- psycopg
 
 ## License
 
