@@ -1,6 +1,6 @@
 from app.core.db.db import  get_session, engine
 from app.core.db.models import Transactions
-from sqlmodel import Session, select
+from sqlmodel import Session, select, cast, String
 from fastapi import Depends, UploadFile, File, HTTPException, APIRouter, HTTPException
 import pandas as pd
 import io
@@ -24,37 +24,45 @@ async def get_transaction(transaction_id: int, session: Session = Depends(get_se
         if transaction is None:
             raise HTTPException(status_code=404, detail="Transaction not found")
         return transaction
-    
 
 
-@router.put("/hoved/{transaction_id}")
-async def update_transaction(transaction_id: int, transaction: TransactionUpdateHovedReturnModel, session: Session = Depends(get_session)):
+@router.get("/year/{year}", response_model=list[TransactionsReturnModel])
+async def get_transactions_by_date(year: str, session: Session = Depends(get_session)):
     with session:
-        existing_transaction = session.get(Transactions, transaction_id)
-        if existing_transaction is None:
+        try:
+            stmt = select(Transactions).where(cast(Transactions.dato, String).like(f"{year}-%"))
+            result = session.exec(stmt).all()
+            if not result:
+                raise HTTPException(status_code=404, detail="No transactions found for this date")
+            return result
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Invalid date format: {str(e)}")
+
+
+@router.put("/hovedkategori/{transaction_id}", response_model = TransactionsReturnModel)
+async def update_transaction(transaction_id: int, hovedkategori: TransactionUpdateHovedReturnModel, session: Session = Depends(get_session)):
+    with session:
+        transaction = session.get(Transactions, transaction_id)
+        if transaction is None:
             raise HTTPException(status_code=404, detail="Transaction not found")
         
-        for key, value in transaction.model_dump(exclude_unset=True).items():
-            setattr(existing_transaction, key, value)
-        
-        session.add(existing_transaction)
+        transaction.hovedkategori = hovedkategori.hovedkategori
+        session.add(transaction)
         session.commit()
-        session.refresh(existing_transaction)
+        session.refresh(transaction)
         return session.get(Transactions, transaction_id)
     
-@router.put("/under/{transaction_id}")
-async def update_transaction(transaction_id: int, transaction: TransactionUpdateUnderReturnModel, session: Session = Depends(get_session)):
+@router.put("/underkategori/{transaction_id}", response_model = TransactionsReturnModel)
+async def update_transaction(transaction_id: int, underkategori: TransactionUpdateUnderReturnModel, session: Session = Depends(get_session)):
     with session:
-        existing_transaction = session.get(Transactions, transaction_id)
-        if existing_transaction is None:
+        transaction = session.get(Transactions, transaction_id)
+        if transaction is None:
             raise HTTPException(status_code=404, detail="Transaction not found")
         
-        for key, value in transaction.model_dump(exclude_unset=True).items():
-            setattr(existing_transaction, key, value)
-        
-        session.add(existing_transaction)
+        transaction.underkategori = underkategori.hovedkategori
+        session.add(transaction)
         session.commit()
-        session.refresh(existing_transaction)
+        session.refresh(transaction)
         return session.get(Transactions, transaction_id)
     
 @router.delete("/{transaction_id}")
