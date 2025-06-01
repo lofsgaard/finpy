@@ -4,22 +4,38 @@ FinPy is a FastAPI-based application for importing, storing, updating, and servi
 
 ## Features
 
-- Imports transaction data via the `/transactions` upload endpoint.
+- Import transaction data via the `/transactions` upload endpoint (CSV file upload).
 - Maps and cleans up CSV columns to match the `Transactions` database model.
-- Stores transactions in a SQLite database (`db/database.db`).
-- Provides a REST API endpoint to fetch all transactions or a single transaction by ID.
+- Stores transactions in a SQLite database.
+- Provides REST API endpoints to fetch all transactions or a single transaction by ID.
 - Supports updating transaction categories (hovedkategori/underkategori) via dedicated endpoints.
 - Allows deleting transactions by ID.
 
 ## Project Structure
 
 ```
-main.py                # FastAPI app entry point
-db/
-  db.py                # Database setup, import logic, session management
-  models.py            # SQLModel data models
-  data/                # Place your CSV files here
-README.md              # This file
+app/
+  api/
+    main.py                # API router entry point
+    routes/
+      transactions.py      # All transaction-related endpoints
+  db/
+    db.py                  # Database setup, session management, import logic
+    models.py              # SQLModel data models
+  core/
+    config.py              # App configuration (if present)
+README.md                  # This file
+```
+
+### Example: API Router Setup
+
+```python
+# filepath: /Users/andreas/Code/finpy/app/api/main.py
+from fastapi import APIRouter
+from app.api.routes import transactions
+
+api_router = APIRouter()
+api_router.include_router(transactions.router)
 ```
 
 ## How It Works
@@ -30,10 +46,10 @@ README.md              # This file
 
 2. **Database:**
 
-   - The database schema is defined in `db/models.py` using SQLModel.
-   - The database file is located at `db/database.db`.
+   - The database schema is defined in `app/db/models.py` using SQLModel.
+   - The database file is typically located at `app/db/database.db` (or as configured).
 
-3. **API:**
+3. **API Endpoints:**
    - `GET /transactions` — Returns all transactions as JSON.
    - `GET /transactions/{transaction_id}` — Returns a single transaction by ID.
    - `POST /transactions` — Upload a CSV file to import transactions.
@@ -52,7 +68,7 @@ README.md              # This file
 2. **Run the application to create database and import:**
 
    ```zsh
-   uv run main.py
+   uv run app/main.py
    ```
 
    This will:
@@ -67,14 +83,15 @@ README.md              # This file
 
    The API will be available at [http://127.0.0.1:8000/transactions](http://127.0.0.1:8000/transactions).
 
-## Customization
-
-- Adjust the column mapping in `db/db.py` if your CSV format changes.
-
 ## Requirements
 
 - Python 3.13+
 - FastAPI
 - SQLModel
 - pandas
-- [uv](https://github.com/astral-sh/uv)
+- uvicorn
+- uv (for dependency management)
+
+## License
+
+MIT License
