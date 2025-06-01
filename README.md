@@ -81,7 +81,7 @@ api_router.include_router(transactions.router)
    uv run fastapi dev
    ```
 
-   The API will be available at [http://127.0.0.1:8000/transactions](http://127.0.0.1:8000/transactions).
+   The API docs will be available at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
 
 ## Requirements
 
